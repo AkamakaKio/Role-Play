@@ -1,0 +1,88 @@
+import random
+
+class Character:
+    def __init__(self, name, health, attack, defense):
+        self.name = name
+        self.health = health
+        self.attack = attack
+        self.defense = defense
+
+    def take_damage(self, damage):
+        actual_damage = max(0, damage - self.defense)
+        self.health -= actual_damage
+        print(f"{self.name} takes {actual_damage} damage.")
+
+    def attack_target(self, target):
+        damage = random.randint(1, self.attack)
+        target.take_damage(damage)
+        print(f"{self.name} attacks {target.name} for {damage} damage.")
+
+    def is_alive(self):
+        return self.health > 0
+
+
+class Player(Character):
+    def __init__(self, name, health, attack, defense, experience=0, level=1):
+        super().__init__(name, health, attack, defense)
+        self.experience = experience
+        self.level = level
+
+    def gain_experience(self, amount):
+        self.experience += amount
+        print(f"{self.name} gains {amount} experience.")
+
+        if self.experience >= 100 * self.level:
+            self.level_up()
+
+    def level_up(self):
+        self.level += 1
+        self.health += 10
+        self.attack += 5
+        self.defense += 3
+        print(f"{self.name} levels up to level {self.level}!")
+
+    def display_stats(self):
+        print(f"{self.name} (Level {self.level}) - Health: {self.health}, Attack: {self.attack}, Defense: {self.defense}")
+
+
+class Enemy(Character):
+    def __init__(self, name, health, attack, defense, experience_reward):
+        super().__init__(name, health, attack, defense)
+        self.experience_reward = experience_reward
+
+    def defeat(self):
+        print(f"{self.name} is defeated! {self.experience_reward} experience gained.")
+        return self.experience_reward
+
+
+def main():
+    player = Player("Hero", health=50, attack=10, defense=5)
+    enemies = [
+        Enemy("Goblin", health=20, attack=8, defense=2, experience_reward=20),
+        Enemy("Orc", health=30, attack=12, defense=4, experience_reward=30),
+        Enemy("Dragon", health=50, attack=20, defense=10, experience_reward=50),
+    ]
+
+    while player.is_alive():
+        player.display_stats()
+        print("1. Attack an enemy")
+        print("2. Quit")
+
+        choice = input("Enter your choice: ")
+
+        if choice == "1":
+            enemy = random.choice(enemies)
+            print(f"You encounter a {enemy.name}!")
+            player.attack_target(enemy)
+
+            if not enemy.is_alive():
+                experience_earned = enemy.defeat()
+                player.gain_experience(experience_earned)
+        elif choice == "2":
+            print("You quit the game.")
+            break
+        else:
+            print("Invalid choice. Try again.")
+
+if __name__ == "__main__":
+    main()
